@@ -5,7 +5,9 @@ Chat application with socket.io
 ### Instructions
 
 ####  Download the code
-``git clone https://github.com/joseanfernandez/chat``
+```console
+git clone https://github.com/joseanfernandez/chat
+```
 
 ####  Install dependencies
 ```console
