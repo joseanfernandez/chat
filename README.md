@@ -8,7 +8,10 @@ Chat application with socket.io
 ``git clone https://github.com/joseanfernandez/chat``
 
 ####  Install dependencies
-``npm install``
+``
+cd chat
+npm install
+``
 
 #### Use it!
 Go to [http://localhost:3000](http://localhost:3000)
