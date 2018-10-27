@@ -1,0 +1,27 @@
+{
+  "name": "chat",
+  "version": "1.0.0",
+  "description": "Chat application with socket.io",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joseanfernandez/chat.git"
+  },
+  "author": "Jose Antonio Fernández García",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joseanfernandez/chat/issues"
+  },
+  "homepage": "https://github.com/joseanfernandez/chat#readme",
+  "dependencies": {
+    "express": "^4.15.2",
+    "socket.io": "^1.7.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.5"
+  }
+}

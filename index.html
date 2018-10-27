@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+    crossorigin="anonymous">
+  <title>Socket.IO chat</title>
+  <style>
+    * { 
+      margin: 0; 
+      padding: 0; 
+      box-sizing: border-box; 
+    }
+
+    body { 
+      font: 13px Helvetica, Arial; 
+    }
+
+    #messages { 
+      list-style-type: none; 
+      margin: 0; 
+      padding-left: 30px; 
+      padding-right: 30px;
+    }
+
+    #messages li { 
+      padding: 10px 25px;
+      font-size: 1.4em; 
+      background: rgb(214, 235, 173); 
+      border-radius: 20px; 
+      margin-top: 10px; 
+    }
+
+    #messages { 
+      margin-bottom: 40px; 
+    }
+
+    .bottomBar { 
+      position: fixed; 
+      bottom: 0; 
+      width: 100%;
+    }
+
+    .bottomBar button { 
+      float: left; 
+      width: 15%;
+    }
+
+    .bottomBar form { 
+      float: left; 
+      width: 85%;
+    }
+
+    #messages li.me { 
+      background-color: #EEF1BD !important; 
+      text-align: right;
+    }
+
+    #messages li.connect { 
+      background-color: #CCC !important; 
+      text-align: center;
+      padding: 5px;
+      font-size: 1em;
+    }
+    
+    #showTyping {
+      text-align: center;
+      background-color: #222;
+      color: #FFF;
+      padding: 5px;
+      visibility: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="showTyping"></div>
+  <!-- Message list -->
+  <ul id="messages"></ul>
+
+  <!-- Bottom bar -->
+  <div class="bottomBar">
+    <!-- Button to show the modal -->
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#nickModal">
+      Set nickname
+    </button>
+    <!-- Form to send message -->
+    <form id="chatForm" action="">
+      <div class="input-group">
+        <input id="m" class="form-control" autocomplete="off" />
+        <button class="btn btn-success">Send</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Modal (set nickname) -->
+  <div class="modal fade" id="nickModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Nickname</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="nickForm">
+            <div class="form-group">
+              <label for="exampleInputEmail1">Set your nickname</label>
+              <input id="nickname" type="text" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Go!</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+  <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+  <script>
+    $(function () {
+      var socket = io();
+      var nick = '';
+      var sms = '';
+      var me = '';
+
+      // CHAT
+      $('#chatForm').submit(function () {
+        
+        // Message to broadcast
+        if (nick != '') {
+          sms = nick + ": ";
+        }
+        sms += $('#m').val();
+        socket.emit('chat message', sms);
+        
+        // Append my own message
+        me += $('#m').val();
+        $('#messages').append($('<li class="me">').text(me));
+        
+        sms = '';
+        me = '';
+        $('#m').val('');
+
+        return false;
+
+      });
+
+  
+      socket.on('chat message', function (msg) {
+        $('#messages').append($('<li>').text(msg));
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      // TYPING
+      $('#m').on('input', function () {
+        socket.emit('typing', sms);
+      });
+
+      socket.on('typing', function (msg) {
+        
+        var text;
+        if (msg === null) {  // If someone does not have nick prevents null message.
+          text = 'Someone is typing';
+        } else {
+          text = msg + ' is typing';
+        }
+          
+        $('#showTyping').html(text); // Add text
+        
+        // Show message
+        $('#showTyping').css('visibility', 'visible');
+        setTimeout(function(){
+          $('#showTyping').css('visibility', 'hidden');
+          }, 2000);
+      });
+      
+      // User connected and disconnected
+      socket.on('user connected', function (msg) {
+        $('#messages').append($('<li class="connect">').text(msg + ' is online'));
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      socket.on('user disconnected', function (msg) {
+        $('#messages').append($('<li class="connect">').text(msg + ' left'));
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      // Nick
+      $('#nickForm').submit(function () {
+        nick = $('#nickname').val();
+        $('#nickModal').modal('hide');   // Close modal
+        socket.emit('user connected', nick);
+        return false;
+      });
+
+      socket.on('change nick', function (msg) {
+        $('#messages').append($('<li class="connect">').text(msg));
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      return false;
+
+    });
+    
+    // Open modal 
+    $(window).on('load', function () {
+      $('#nickModal').modal('show');
+    });
+
+  </script>
+</body>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+  crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+  crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+  crossorigin="anonymous"></script>
+
+</html>
