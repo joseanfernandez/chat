@@ -16,5 +16,8 @@ npm install
 ```
 
 #### Use it!
+```console
+npm start
+```
 Go to [http://localhost:3000](http://localhost:3000)
 
