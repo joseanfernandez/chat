@@ -19,9 +19,9 @@
   "homepage": "https://github.com/joseanfernandez/chat#readme",
   "dependencies": {
     "express": "^4.15.2",
-    "socket.io": "^2.1.1"
+    "socket.io": "^2.2.0"
   },
   "devDependencies": {
-    "nodemon": "^1.18.5"
+    "nodemon": "^1.18.10"
   }
 }
